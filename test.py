@@ -1,4 +1,7 @@
+
 import subprocess
 
-user_input = input("Enter a command: ")
-subprocess.run(user_input, shell=True)
+def run_command(user_input):
+    subprocess.run(user_input, shell=True)
+
+run_command("echo hello")

@@ -1,7 +1,10 @@
-
+from flask import Flask, request
 import subprocess
 
-def run_command(user_input):
-    subprocess.run(user_input, shell=True)
+app = Flask(__name__)
 
-run_command("echo hello")
+@app.route("/run")
+def run_command():
+    command = request.args.get("cmd")
+    subprocess.run(command, shell=True)
+    return "Command executed"

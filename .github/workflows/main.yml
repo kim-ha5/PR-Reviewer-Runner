@@ -47,4 +47,17 @@ jobs:
           path: sarif-results/*.sarif
           if-no-files-found: error
 
+  llm-review:
+    name: LLM Review
+    needs: analyze
+    if: success()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Confirm LLM review starts
+        run: echo "LLM Review job started successfully!"
+
 

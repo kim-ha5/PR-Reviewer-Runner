@@ -57,7 +57,42 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Confirm LLM review starts
-        run: echo "LLM Review job started successfully!"
+      - name: Download CodeQL findings
+        uses: actions/download-artifact@v4
+        with:
+          name: codeql-findings
+          path: findings
+          run-id: ${{ github.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate findings JSON
+        id: findings
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("findings/codeql-findings.json")
+          if not path.exists():
+              raise SystemExit(f"Artifact file not found: {path}")
+
+          data = json.loads(path.read_text())
+          if not isinstance(data, list):
+              raise SystemExit("Expected the findings JSON to be an array")
+
+          print(f"Found {len(data)} CodeQL findings")
+          with open("findings-output.txt", "w") as f:
+              f.write(str(len(data)))
+          PY
+
+          echo "count=$(cat findings-output.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: Run LLM runner
+        if: steps.findings.outputs.count != '0'
+        run: echo "Findings are ready for the LLM runner"
+
+      - name: Skip LLM review when no findings exist
+        if: steps.findings.outputs.count == '0'
+        run: echo "No findings to review; skipping LLM runner"
 
 

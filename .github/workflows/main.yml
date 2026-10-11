@@ -30,6 +30,15 @@ jobs:
         with:
           output: sarif-results
 
+      - name: Extract CodeQL findings
+        run: python3 scripts/extract_codeql.py
+
+      - name: Save extracted CodeQL findings
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-findings
+          path: codeql-findings.json
+          if-no-files-found: error
 
       - name: Save CodeQL SARIF report
         uses: actions/upload-artifact@v4

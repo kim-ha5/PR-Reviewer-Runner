@@ -5,7 +5,7 @@ import time
 import platform
 
 
-OLLAMA_URL = "http://127.0.0.1:11434"
+OLLAMA_URL= "http://127.0.0.1:11434"
 MODEL = "qwen2.5:7b"
 
 
@@ -15,23 +15,48 @@ def check_ollama_installed():
 
 
 def install_ollama():
-    """Install Ollama using Homebrew."""
-    print("Ollama is not installed. Installing Ollama...")
+    """Install Ollama based on the operating system."""
+    system = platform.system()
 
-    if platform.system()!= "Darwin":
-        raise RuntimeError(
-            "Automatic installation is currently configured for macOS only."
+    if system== "Darwin":
+        # macOS
+        if shutil.which("brew") is None:
+            raise RuntimeError(
+                "Homebrew is not installed. "
+                "Please install Homebrew first."
+            )
+
+        print("Installing Ollama on macOS...")
+        subprocess.run(
+            ["brew", "install", "ollama"],
+            check=True
         )
 
-    if shutil.which("brew") is None:
-        raise RuntimeError(
-            "Homebrew is not installed. Please install Homebrew first."
+    elif system== "Linux":
+        # Linux
+        print("Installing Ollama on Linux...")
+        subprocess.run(
+            [
+                "sh",
+                "-c",
+                "curl -fsSL https://ollama.com/install.sh | sh"
+            ],
+            check=True
         )
 
-    subprocess.run(
-        ["brew", "install", "ollama"],
-        check=True
-    )
+    elif system =="Windows":
+        # Windows
+        raise RuntimeError(
+            "Ollama is not installed.\n"
+            "Please install Ollama from:\n"
+            "https://ollama.com/download/windows\n"
+            "Then run this program again."
+        )
+
+    else:
+        raise RuntimeError(
+            f"Unsupported operating system: {system}"
+        )
 
     print("Ollama installed successfully.")
 
@@ -39,8 +64,13 @@ def install_ollama():
 def is_ollama_running():
     """Check if the Ollama server is running."""
     try:
-        response =requests.get(OLLAMA_URL, timeout=5)
+        response = requests.get(
+            OLLAMA_URL,
+            timeout=5
+        )
+
         return response.status_code == 200
+
     except requests.RequestException:
         return False
 
@@ -54,25 +84,28 @@ def start_ollama():
     print("Starting Ollama...")
 
     subprocess.Popen(
-        ["ollama","serve"],
+        ["ollama", "serve"],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL
     )
 
-    # Give Ollama a few seconds to start
-    for _ in range(10):
+    # Wait for Ollama to start
+    for _ in range(15):
         if is_ollama_running():
             print("Ollama is running.")
             return
+
         time.sleep(1)
 
-    raise RuntimeError("Ollama failed to start.")
+    raise RuntimeError(
+        "Ollama failed to start."
+    )
 
 
 def check_model():
-    """Check if the Qwen model is available."""
+    """Check if the Qwen model is installed."""
     result =subprocess.run(
-        ["ollama","list"],
+        ["ollama", "list"],
         capture_output=True,
         text=True,
         check=True
@@ -82,9 +115,11 @@ def check_model():
         print(f"{MODEL} is already installed.")
         return
 
-    print(f"{MODEL} is not installed. Downloading...")
+    print(f"{MODEL} is not installed.")
+    print(f"Downloading {MODEL}...")
+
     subprocess.run(
-        ["ollama","pull", MODEL],
+        ["ollama", "pull", MODEL],
         check=True
     )
 
@@ -100,6 +135,7 @@ def query_qwen(prompt):
     }
 
     print("Sending request to Qwen...")
+
     start = time.time()
 
     response = requests.post(
@@ -108,9 +144,10 @@ def query_qwen(prompt):
         timeout=120
     )
 
+    elapsed = time.time() - start
+
     print(
-        f"Response received in "
-        f"{time.time() - start:.1f} seconds"
+        f"Response received in {elapsed:.1f} seconds"
     )
 
     response.raise_for_status()
@@ -123,7 +160,7 @@ def query_qwen(prompt):
 def main():
     """Set up Ollama and test the Qwen model."""
 
-    # Check/install Ollama
+    # Check if Ollama is installed
     if check_ollama_installed():
         print("Ollama is installed.")
     else:
@@ -132,11 +169,12 @@ def main():
     # Start Ollama if necessary
     start_ollama()
 
-    # Make sure Qwen is available
+    # Check if Qwen is installed
     check_model()
 
     # Test Qwen
     prompt = "Say hello in one sentence."
+
     result = query_qwen(prompt)
 
     print("\n--- Qwen Response ---")

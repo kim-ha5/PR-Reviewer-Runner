@@ -23,6 +23,19 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: python
+          queries: security-extended
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
+        with:
+          output: sarif-results
+
+
+      - name: Save CodeQL SARIF report
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-sarif-results
+          path: sarif-results/*.sarif
+          if-no-files-found: error
+
+

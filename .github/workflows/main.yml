@@ -31,7 +31,7 @@ jobs:
           output: sarif-results
 
       - name: Extract CodeQL findings
-        run: python3 scripts/extract_codeql.py
+        run: python3 scripts/extract_output.py
 
       - name: Save extracted CodeQL findings
         uses: actions/upload-artifact@v4

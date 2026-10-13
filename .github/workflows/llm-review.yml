@@ -1,0 +1,37 @@
+
+name: LLM Review
+
+on:
+  workflow_run:
+    workflows: ["CodeQL"]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+
+jobs:
+  llm-review:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Download CodeQL findings
+        uses: actions/download-artifact@v4
+        with:
+          name: codeql-findings
+          path: findings
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Inspect findings
+        run: |
+          ls -lah findings
+          python3 -m json.tool findings/codeql-findings.json
+
+      - name: Run LLM review
+        run: python3 scripts/llm_runner.py findings/codeql-findings.json

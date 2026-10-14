@@ -1,12 +1,18 @@
+import argparse
+import json
 import requests
 import subprocess
 import shutil
 import time
 import platform
+from pathlib import Path
 
 
-OLLAMA_URL= "http://127.0.0.1:11434"
+OLLAMA_URL = "http://127.0.0.1:11434"
 MODEL = "qwen2.5:7b"
+DEFAULT_PROMPT = Path("prompts/test-prompt.md")
+DEFAULT_FINDINGS = Path("codeql-findings.json")
+DEFAULT_SOURCE = Path("testing_code.py")
 
 
 def check_ollama_installed():
@@ -157,8 +163,64 @@ def query_qwen(prompt):
     return data["response"]
 
 
+def load_prompt(template_path, findings_path, source_path):
+    """Build the LLM prompt from CodeQL findings and the vulnerable source."""
+    if not template_path.is_file():
+        raise FileNotFoundError(f"Prompt file not found: {template_path}")
+    if not findings_path.is_file():
+        raise FileNotFoundError(
+            f"CodeQL findings file not found: {findings_path}. "
+            "Run CodeQL and scripts/extract_output.py first."
+        )
+    if not source_path.is_file():
+        raise FileNotFoundError(f"Source file not found: {source_path}")
+
+    try:
+        findings = json.loads(findings_path.read_text(encoding="utf-8-sig"))
+    except json.JSONDecodeError as error:
+        raise ValueError(
+            f"CodeQL findings are not valid JSON: {findings_path}"
+        ) from error
+
+    if not isinstance(findings, list):
+        raise ValueError("CodeQL findings must be a JSON array.")
+    if not findings:
+        raise ValueError("CodeQL produced no findings to explain.")
+
+    prompt = template_path.read_text(encoding="utf-8")
+    return prompt.replace(
+        "{{codeql_result}}",
+        json.dumps(findings, indent=2, ensure_ascii=False),
+    ).replace(
+        "{{source_code}}",
+        source_path.read_text(encoding="utf-8"),
+    )
+
+
 def main():
-    """Set up Ollama and test the Qwen model."""
+    """Explain CodeQL findings with Ollama."""
+    parser = argparse.ArgumentParser(
+        description="Send CodeQL findings and source code to Ollama."
+    )
+    parser.add_argument(
+        "--findings",
+        type=Path,
+        default=DEFAULT_FINDINGS,
+        help="JSON file produced by scripts/extract_output.py",
+    )
+    parser.add_argument(
+        "--source",
+        type=Path,
+        default=DEFAULT_SOURCE,
+        help="Source file referenced by the CodeQL findings",
+    )
+    parser.add_argument(
+        "--prompt",
+        type=Path,
+        default=DEFAULT_PROMPT,
+        help="Prompt template containing {{codeql_result}} and {{source_code}}",
+    )
+    args = parser.parse_args()
 
     # Check if Ollama is installed
     if check_ollama_installed():
@@ -172,8 +234,7 @@ def main():
     # Check if Qwen is installed
     check_model()
 
-    # Test Qwen
-    prompt = "Say hello in one sentence."
+    prompt = load_prompt(args.prompt, args.findings, args.source)
 
     result = query_qwen(prompt)
 

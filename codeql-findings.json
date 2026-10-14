@@ -1,0 +1,24 @@
+[
+  {
+    "rule_id": "py/command-line-injection",
+    "title": "Uncontrolled command line",
+    "message": "The argument to subprocess.run is controlled by a remote user.",
+    "severity": "9.0",
+    "level": "error",
+    "locations": [
+      {
+        "file": "testing_code.py",
+        "start_line": 11,
+        "end_line": 11,
+        "start_column": 5
+      }
+    ],
+    "data_flow": [
+      {
+        "file": "testing_code.py",
+        "line": 10,
+        "description": "User-controlled query parameter"
+      }
+    ]
+  }
+]

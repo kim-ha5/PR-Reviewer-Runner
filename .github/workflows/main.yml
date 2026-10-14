@@ -46,34 +46,3 @@ jobs:
           name: codeql-sarif-results
           path: sarif-results/*.sarif
           if-no-files-found: error
-
-  llm-review:
-    name: LLM Review
-    needs: analyze
-    if: success()
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Download CodeQL findings
-        uses: actions/download-artifact@v4
-        with:
-          name: codeql-findings
-          path: findings
-          run-id: ${{ github.run_id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Prepare findings for LLM integration
-        run: |
-          python3 scripts/llm_runner.py \
-            findings/codeql-findings.json \
-            findings/llm-input.json
-
-      - name: Upload prepared findings
-        uses: actions/upload-artifact@v4
-        with:
-          name: llm-input
-          path: findings/llm-input.json
-          if-no-files-found: error

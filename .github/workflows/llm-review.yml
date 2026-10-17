@@ -60,6 +60,13 @@ jobs:
       - name: Download Qwen model
         run: ollama pull qwen2.5:7b
 
+      - name: Debug prompt
+        run: |
+          echo "Checked-out commit:"
+          git log -1 --oneline
+          echo "Prompt contents:"
+          cat prompts/test-prompt.md
+
       - name: Run LLM review
         run: |
           python3 llm_test.py \

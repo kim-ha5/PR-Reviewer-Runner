@@ -56,7 +56,7 @@ jobs:
           echo "Ollama failed to start. Server log:"
           cat ollama.log
           exit 1
-          
+
       - name: Download Qwen model
         run: ollama pull qwen2.5:7b
 

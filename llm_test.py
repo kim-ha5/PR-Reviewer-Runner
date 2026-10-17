@@ -147,7 +147,7 @@ def query_qwen(prompt):
     response = requests.post(
         f"{OLLAMA_URL}/api/generate",
         json=payload,
-        timeout=120
+        timeout=None
     )
 
     elapsed = time.time() - start

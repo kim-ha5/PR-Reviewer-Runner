@@ -44,9 +44,19 @@ jobs:
       - name: Start Ollama
         run: |
           ollama serve > ollama.log 2>&1 &
-          curl --fail --retry 30 --retry-delay 2 \
-            http://127.0.0.1:11434/api/tags
+          for i in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:11434/api/tags; then
+              echo "Ollama is ready"
+              exit 0
+            fi
+            echo "Waiting for Ollama to start..."
+            sleep 2
+          done
 
+          echo "Ollama failed to start. Server log:"
+          cat ollama.log
+          exit 1
+          
       - name: Download Qwen model
         run: ollama pull qwen2.5:7b
 

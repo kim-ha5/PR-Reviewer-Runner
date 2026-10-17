@@ -12,6 +12,11 @@ Include:
 4. A suggested remediation
 5. A short secure-code example
 
+Do not recommend shell escaping or input sanitization as the only fix for
+command injection. Prefer avoiding shell execution, using a fixed allowlist of
+commands and arguments, and validating that the remediation actually removes
+the injection path. Do not include another `shell=True` example in secure code.
+
 CodeQL finding:
 {{codeql_result}}
 

@@ -134,12 +134,28 @@ def check_model():
     print(f"{MODEL} downloaded successfully.")
 
 
+REVIEW_SCHEMA = {
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "finding_index": {"type": "integer"},
+            "explanation": {"type": "string"},
+            "impact": {"type": "string"},
+        },
+        "required": ["finding_index", "explanation", "impact"],
+    },
+}
+
+
 def query_qwen(prompt):
     """Send a prompt to Qwen through the Ollama API."""
     payload = {
         "model": MODEL,
         "prompt": prompt,
-        "stream": False
+        "stream": False,
+        "format": REVIEW_SCHEMA,
+        "options": {"temperature": 0},
     }
 
     print("Sending request to Qwen...")
@@ -177,7 +193,11 @@ def parse_review(result, finding_count):
     try:
         review = json.loads(cleaned)
     except json.JSONDecodeError as error:
-        raise ValueError("Qwen did not return valid JSON.") from error
+        excerpt = cleaned[max(0, error.pos - 80):error.pos + 80]
+        raise ValueError(
+            "Qwen did not return valid JSON near "
+            f"character {error.pos}: {excerpt!r}"
+        ) from error
 
     if not isinstance(review, list) or len(review) != finding_count:
         raise ValueError(
@@ -291,6 +311,9 @@ def main():
     findings = json.loads(args.findings.read_text(encoding="utf-8-sig"))
 
     result = query_qwen(prompt)
+
+    args.markdown_output.parent.mkdir(parents=True, exist_ok=True)
+    args.markdown_output.write_text(result.rstrip() + "\n", encoding="utf-8")
     review = parse_review(result, len(findings))
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -298,8 +321,6 @@ def main():
         json.dumps(review, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
-    args.markdown_output.parent.mkdir(parents=True, exist_ok=True)
-    args.markdown_output.write_text(result.rstrip() + "\n", encoding="utf-8")
 
     print("\n--- Qwen Response ---")
     print(result)

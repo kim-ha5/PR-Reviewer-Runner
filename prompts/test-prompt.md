@@ -1,23 +1,24 @@
-# Explain CodeQL Finding
+# Explain CodeQL Findings
 
 You are a security-focused code reviewer.
 
-Explain the following CodeQL finding in plain language for a learning developer
-in the early stages who likely doesn't know a lot about security practices.
+Return only valid JSON. Do not wrap the JSON in Markdown code fences.
 
-Include:
-1. What the vulnerability means
-2. Why the code is vulnerable
-3. The realistic impact
+Return one object for every finding, preserving the finding's zero-based
+`finding_index`:
 
-Do not recommend shell escaping or input sanitization as the only fix for
-command injection. Prefer avoiding shell execution, using a fixed allowlist of
-commands and arguments, and validating that the remediation actually removes
-the injection path. Do not include another `shell=True` example in secure code.
+[
+  {
+    "finding_index": 0,
+    "explanation": "Explain what the vulnerability means and why this code is vulnerable in plain language for a learning developer.",
+    "impact": "Describe the realistic security impact."
+  }
+]
 
-Do not just repeat what CodeQL already provides
+Use a separate object for each finding. Do not add, remove, or reorder findings.
+Do not include remediation advice in the JSON.
 
-CodeQL finding:
+CodeQL findings:
 {{codeql_result}}
 
 Relevant source code:

@@ -13,6 +13,8 @@ MODEL = "qwen2.5:7b"
 DEFAULT_PROMPT = Path("prompts/test-prompt.md")
 DEFAULT_FINDINGS = Path("codeql-findings.json")
 DEFAULT_SOURCE = Path("testing_code.py")
+DEFAULT_OUTPUT = Path("findings/llm-review.json")
+DEFAULT_MARKDOWN_OUTPUT = Path("findings/llm-review.md")
 
 
 def check_ollama_installed():
@@ -163,6 +165,45 @@ def query_qwen(prompt):
     return data["response"]
 
 
+def parse_review(result, finding_count):
+    """Parse and validate the model's one-explanation-per-finding response."""
+    cleaned = result.strip()
+    if cleaned.startswith("```"):
+        lines = cleaned.splitlines()
+        if len(lines) < 3 or not lines[-1].strip().startswith("```"):
+            raise ValueError("Qwen returned an incomplete JSON code fence.")
+        cleaned = "\n".join(lines[1:-1]).strip()
+
+    try:
+        review = json.loads(cleaned)
+    except json.JSONDecodeError as error:
+        raise ValueError("Qwen did not return valid JSON.") from error
+
+    if not isinstance(review, list) or len(review) != finding_count:
+        raise ValueError(
+            "Qwen must return exactly one review object per CodeQL finding."
+        )
+
+    indices = []
+    for item in review:
+        if not isinstance(item, dict):
+            raise ValueError("Every Qwen review must be a JSON object.")
+        if not isinstance(item.get("finding_index"), int):
+            raise ValueError("Every review must have an integer finding_index.")
+        if not isinstance(item.get("explanation"), str) or not item["explanation"].strip():
+            raise ValueError("Every review must have a non-empty explanation.")
+        if not isinstance(item.get("impact"), str) or not item["impact"].strip():
+            raise ValueError("Every review must have a non-empty impact.")
+        indices.append(item["finding_index"])
+
+    if sorted(indices) != list(range(finding_count)):
+        raise ValueError(
+            "Qwen review indices must contain every CodeQL finding exactly once."
+        )
+
+    return review
+
+
 def load_prompt(template_path, findings_path, source_path):
     """Build the LLM prompt from CodeQL findings and the vulnerable source."""
     if not template_path.is_file():
@@ -220,6 +261,18 @@ def main():
         default=DEFAULT_PROMPT,
         help="Prompt template containing {{codeql_result}} and {{source_code}}",
     )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=DEFAULT_OUTPUT,
+        help="JSON file for the validated per-finding review",
+    )
+    parser.add_argument(
+        "--markdown-output",
+        type=Path,
+        default=DEFAULT_MARKDOWN_OUTPUT,
+        help="Markdown file containing the raw model response",
+    )
     args = parser.parse_args()
 
     # Check if Ollama is installed
@@ -235,8 +288,18 @@ def main():
     check_model()
 
     prompt = load_prompt(args.prompt, args.findings, args.source)
+    findings = json.loads(args.findings.read_text(encoding="utf-8-sig"))
 
     result = query_qwen(prompt)
+    review = parse_review(result, len(findings))
+
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(
+        json.dumps(review, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    args.markdown_output.parent.mkdir(parents=True, exist_ok=True)
+    args.markdown_output.write_text(result.rstrip() + "\n", encoding="utf-8")
 
     print("\n--- Qwen Response ---")
     print(result)

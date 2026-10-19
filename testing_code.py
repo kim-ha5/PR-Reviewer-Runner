@@ -1,10 +1,12 @@
-#Sample vulnerable code for testing
+# Sample vulnerable code for testing CodeQL-to-LLM review comments.
 
 # from flask import Flask, request
 # import subprocess
-
+#
+#
 # app = Flask(__name__)
-
+#
+#
 # @app.route("/run")
 # def run_command():
 #     command = request.args.get("cmd")

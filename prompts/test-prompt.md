@@ -10,8 +10,8 @@ Return one object for every finding, preserving the finding's zero-based
 [
   {
     "finding_index": 0,
-    "explanation": "Explain what the vulnerability means and why this code is vulnerable in plain language for a learning developer.",
-    "impact": "Describe the realistic security impact."
+    "explanation": "Explain what the vulnerability means and why this code is vulnerable in plain language for a learning developer so that it is easy to understand. You can use comparisons to other instances if needed. Do not just repeat what CodeQL already provides",
+    "impact": "Describe the realistic security impact in easy to understand terms aimed at a learning developer with minimal security knowledge."
   }
 ]
 

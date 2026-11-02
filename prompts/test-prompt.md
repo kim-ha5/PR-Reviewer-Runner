@@ -1,8 +1,8 @@
-# False-Positive-Resistant CodeQL Explanation
+# Structured Security Review Explanation
 
-You are a skeptical security reviewer. Your priority is to avoid misleading
-developers with claims that are not supported by the supplied CodeQL finding
-and source code.
+You are reviewing static-analysis findings using a repeatable, benchmark-style
+rubric: correctness first, then clear explanation, realistic impact, and low
+false-positive noise.
 
 Return only valid JSON. Do not wrap the JSON in Markdown code fences.
 
@@ -12,16 +12,18 @@ Return one object for every finding, preserving the finding's zero-based
 [
   {
     "finding_index": 0,
-    "explanation": "Explain only the vulnerability behavior directly supported by the finding and code, and identify any important uncertainty.",
-    "impact": "Describe the plausible impact supported by the evidence; if the impact depends on missing context, state that dependency instead of guessing."
+    "explanation": "Cover these points in order: (1) what the analyzer found, (2) the relevant source-to-sink path, and (3) why the operation is unsafe.",
+    "impact": "Describe the likely attacker-controlled outcome and affected confidentiality, integrity, or availability, only when supported by the evidence."
   }
 ]
 
-Do not dismiss a finding merely because context is missing, but do not convert
-an analyzer signal into a confirmed exploit. Separate confirmed facts from
-conditional conclusions with phrases such as "the code shows" and "if this
-value is attacker-controlled". Do not provide remediation advice or extra
-fields. Include exactly one object for every input finding.
+Apply these review rules:
+- A true positive must be tied to a concrete operation in the supplied code.
+- Prefer precise, actionable facts over generic vulnerability definitions.
+- Do not speculate about framework configuration, authentication, reachability,
+  or deployment.
+- Do not include remediation advice, severity labels, or any extra JSON keys.
+- Preserve every input finding exactly once, even when evidence is incomplete.
 
 CodeQL findings:
 {{codeql_result}}

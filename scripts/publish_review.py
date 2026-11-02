@@ -40,29 +40,30 @@ def find_pull_request(repository, commit_sha, token):
     return pull_requests[0]["number"]
 
 
-def review_body(finding, explanation, impact, marker):
+def review_body(finding, review, marker):
+    impact = review["impact"]
     sections = [
-        ("Finding", explanation.get("finding_summary")),
-        ("Security concept", explanation.get("security_concept")),
-        ("Data flow", explanation.get("data_flow")),
-        ("Code evidence", explanation.get("code_evidence")),
-        ("Walkthrough", explanation.get("walkthrough")),
-        ("Attack scenario", explanation.get("attack_scenario")),
-        ("Reachability", explanation.get("reachability")),
-        ("Exploitability", explanation.get("exploitability")),
-        ("Confirmed facts", explanation.get("confirmed_facts")),
-        ("Conditional risk", explanation.get("conditional_risk")),
-        ("Security boundary", explanation.get("security_boundary")),
-        ("Why it matters", explanation.get("explanation")),
+        ("Finding", review.get("finding_summary")),
+        ("Security concept", review.get("security_concept")),
+        ("Data flow", review.get("data_flow")),
+        ("Code evidence", review.get("code_evidence")),
+        ("Walkthrough", review.get("walkthrough")),
+        ("Attack scenario", review.get("attack_scenario")),
+        ("Reachability", review.get("reachability")),
+        ("Exploitability", review.get("exploitability")),
+        ("Confirmed facts", review.get("confirmed_facts")),
+        ("Conditional risk", review.get("conditional_risk")),
+        ("Security boundary", review.get("security_boundary")),
+        ("Why it matters", review.get("explanation")),
         ("Impact", impact),
-        ("Priority rationale", explanation.get("priority_rationale")),
-        ("Uncertainty", explanation.get("uncertainty")),
-        ("Missing context", explanation.get("missing_context")),
-        ("Learning notes", explanation.get("learning_notes")),
-        ("Investigation questions", explanation.get("investigation_questions")),
-        ("Developer takeaway", explanation.get("developer_takeaway")),
-        ("Confidence", explanation.get("confidence")),
-        ("Limitations", explanation.get("limitations")),
+        ("Priority rationale", review.get("priority_rationale")),
+        ("Uncertainty", review.get("uncertainty")),
+        ("Missing context", review.get("missing_context")),
+        ("Learning notes", review.get("learning_notes")),
+        ("Investigation questions", review.get("investigation_questions")),
+        ("Developer takeaway", review.get("developer_takeaway")),
+        ("Confidence", review.get("confidence")),
+        ("Limitations", review.get("limitations")),
     ]
     rendered_sections = "\n\n".join(
         f"**{title}:**\n{content}"
@@ -98,8 +99,7 @@ def publish_review(findings, explanations, repository, commit_sha, token):
         explanation = explanations[index]
         body = review_body(
             finding,
-            explanation["explanation"],
-            explanation["impact"],
+            explanation,
             marker,
         )
         locations = finding.get("locations") or []

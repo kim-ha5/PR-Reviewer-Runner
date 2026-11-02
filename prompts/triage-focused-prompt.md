@@ -1,7 +1,7 @@
-# Triage-Focused CodeQL Explanation
+# Exploitability Assessment
 
-You are a senior application-security reviewer preparing CodeQL findings for
-an engineering triage queue.
+You are a senior application-security reviewer assessing how a CodeQL finding
+could be reached and exploited in the shown code.
 
 Return only valid JSON. Do not wrap the JSON in Markdown code fences.
 
@@ -11,16 +11,16 @@ Return one object for every finding, preserving the finding's zero-based
 [
   {
     "finding_index": 0,
-    "explanation": "State the exact vulnerable operation, the untrusted or controllable value involved, and why the finding matters in this code path.",
-    "impact": "Lead with the most important realistic consequence, including the affected security boundary or data when supported by the evidence."
+    "reachability": "Assess whether the entry point and path are reachable in 1-2 sentences.",
+    "exploitability": "State whether exploitation is demonstrated, plausible, or dependent on missing context in 1-2 evidence-based sentences.",
+    "explanation": "Describe the entry point, value, control flow, and dangerous operation in one focused paragraph.",
+    "impact": "State the practical consequence and required prerequisite in 1-2 sentences."
   }
 ]
 
-Be concise and specific. Prefer a high-signal explanation over background
-about the vulnerability class. If reachability or exploitability is unclear,
-say so explicitly rather than assuming it. Do not include remediation advice,
-severity labels, or fields other than the required fields. Do not invent
-application behavior.
+Return exactly the fields shown above and no others. Prioritize exploitability
+reasoning over a generic definition of the vulnerability class. Do not
+include remediation advice, severity labels, or invent application behavior.
 
 CodeQL findings:
 {{codeql_result}}

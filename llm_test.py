@@ -142,6 +142,25 @@ REVIEW_SCHEMA = {
             "finding_index": {"type": "integer"},
             "explanation": {"type": "string"},
             "impact": {"type": "string"},
+            "finding_summary": {"type": "string"},
+            "data_flow": {"type": "string"},
+            "code_evidence": {"type": "string"},
+            "uncertainty": {"type": "string"},
+            "developer_takeaway": {"type": "string"},
+            "security_concept": {"type": "string"},
+            "walkthrough": {"type": "string"},
+            "attack_scenario": {"type": "string"},
+            "learning_notes": {"type": "string"},
+            "reachability": {"type": "string"},
+            "exploitability": {"type": "string"},
+            "priority_rationale": {"type": "string"},
+            "missing_context": {"type": "string"},
+            "confirmed_facts": {"type": "string"},
+            "conditional_risk": {"type": "string"},
+            "confidence": {"type": "string"},
+            "limitations": {"type": "string"},
+            "security_boundary": {"type": "string"},
+            "investigation_questions": {"type": "string"},
         },
         "required": ["finding_index", "explanation", "impact"],
     },
@@ -214,6 +233,14 @@ def parse_review(result, finding_count):
             raise ValueError("Every review must have a non-empty explanation.")
         if not isinstance(item.get("impact"), str) or not item["impact"].strip():
             raise ValueError("Every review must have a non-empty impact.")
+        for field, value in item.items():
+            if field not in REVIEW_SCHEMA["items"]["properties"]:
+                raise ValueError(f"Unexpected review field: {field}.")
+            if field not in {"finding_index", "explanation", "impact"}:
+                if not isinstance(value, str) or not value.strip():
+                    raise ValueError(
+                        f"Optional review field {field} must be a non-empty string."
+                    )
         indices.append(item["finding_index"])
 
     if sorted(indices) != list(range(finding_count)):

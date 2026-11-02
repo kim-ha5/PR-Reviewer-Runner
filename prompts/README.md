@@ -9,11 +9,13 @@ compared by passing a different `--prompt` path:
 
 | Template | Main trade-off |
 | --- | --- |
-| `test-prompt.md` | Simple baseline explanation |
-| `evidence-first-prompt.md` | Strict source/data-flow grounding |
-| `developer-mentor-prompt.md` | More teaching context for beginners |
-| `triage-focused-prompt.md` | Short, high-signal queue-ready output |
-| `false-positive-resistant-prompt.md` | Explicit uncertainty and conservative claims |
-| `structured-review-prompt.md` | Repeatable rubric across findings |
+| `test-prompt.md` | General detailed explanation |
+| `evidence-first-prompt.md` | Forensic source-to-sink reconstruction |
+| `developer-mentor-prompt.md` | Guided lesson with a hypothetical scenario |
+| `triage-focused-prompt.md` | Exploitability and reachability assessment |
+| `false-positive-resistant-prompt.md` | Claim-calibrated uncertainty analysis |
+| `structured-review-prompt.md` | Fixed mini-report with section headings |
 
-
+The variants use a few focused sections rather than one oversized explanation.
+`llm_test.py` validates the optional sections, and the publisher includes them
+in the pull-request review.

@@ -41,11 +41,38 @@ def find_pull_request(repository, commit_sha, token):
 
 
 def review_body(finding, explanation, impact, marker):
+    sections = [
+        ("Finding", explanation.get("finding_summary")),
+        ("Security concept", explanation.get("security_concept")),
+        ("Data flow", explanation.get("data_flow")),
+        ("Code evidence", explanation.get("code_evidence")),
+        ("Walkthrough", explanation.get("walkthrough")),
+        ("Attack scenario", explanation.get("attack_scenario")),
+        ("Reachability", explanation.get("reachability")),
+        ("Exploitability", explanation.get("exploitability")),
+        ("Confirmed facts", explanation.get("confirmed_facts")),
+        ("Conditional risk", explanation.get("conditional_risk")),
+        ("Security boundary", explanation.get("security_boundary")),
+        ("Why it matters", explanation.get("explanation")),
+        ("Impact", impact),
+        ("Priority rationale", explanation.get("priority_rationale")),
+        ("Uncertainty", explanation.get("uncertainty")),
+        ("Missing context", explanation.get("missing_context")),
+        ("Learning notes", explanation.get("learning_notes")),
+        ("Investigation questions", explanation.get("investigation_questions")),
+        ("Developer takeaway", explanation.get("developer_takeaway")),
+        ("Confidence", explanation.get("confidence")),
+        ("Limitations", explanation.get("limitations")),
+    ]
+    rendered_sections = "\n\n".join(
+        f"**{title}:**\n{content}"
+        for title, content in sections
+        if content
+    )
     return (
         f"{marker}\n\n"
         f"### {finding.get('title', 'CodeQL finding')}\n\n"
-        f"{explanation}\n\n"
-        f"**Impact:** {impact}\n\n"
+        f"{rendered_sections}\n\n"
         f"**CodeQL rule:** `{finding['rule_id']}`"
     )
 

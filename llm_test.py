@@ -10,7 +10,7 @@ from pathlib import Path
 
 OLLAMA_URL = "http://127.0.0.1:11434"
 MODEL = "qwen2.5:7b"
-DEFAULT_PROMPT = Path("prompts/test-prompt.md")
+DEFAULT_PROMPT = Path("prompts/developer-mentor-prompt.md")
 DEFAULT_FINDINGS = Path("codeql-findings.json")
 DEFAULT_SOURCE = Path("testing_code.py")
 DEFAULT_OUTPUT = Path("findings/llm-review.json")

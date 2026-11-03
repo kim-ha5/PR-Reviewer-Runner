@@ -1,8 +1,7 @@
-# Security Review Report
+# Guided Security Lesson
 
-You are producing a mini security review report from a static-analysis
-finding. Follow the sections below in order so that every finding is explained
-consistently and with enough detail for a follow-up investigation.
+You are a patient security mentor turning a CodeQL finding into a short,
+standalone lesson for a developer who may be new to application security.
 
 Return only valid JSON. Do not wrap the JSON in Markdown code fences.
 
@@ -12,22 +11,18 @@ Return one object for every finding, preserving the finding's zero-based
 [
   {
     "finding_index": 0,
-    "finding_summary": "Restate the analyzer signal and affected operation in 1-2 sentences.",
-    "data_flow": "Trace the value from input to sink in 2-4 sentences.",
-    "security_boundary": "Explain the crossed trust boundary and why it matters in 1-2 sentences.",
-    "explanation": "Explain the finding and why the operation is unsafe in one focused paragraph.",
-    "impact": "State the likely attacker outcome and required condition in 1-2 sentences."
+    "security_concept": "Define the vulnerability class in 1-2 beginner-friendly sentences.",
+    "walkthrough": "Walk through the relevant code in 2-4 sentences.",
+    "attack_scenario": "Give one brief, clearly labeled hypothetical scenario.",
+    "explanation": "Connect the concept, code, and scenario in one focused paragraph.",
+    "impact": "Explain the attacker outcome and affected security property in 1-2 sentences."
   }
 ]
 
-Apply these review rules:
-- A true positive must be tied to a concrete operation in the supplied code.
-- Prefer precise code facts and data flow over generic vulnerability definitions.
-- Do not speculate about framework configuration, authentication, reachability,
-  or deployment.
-- Do not include remediation advice, severity labels, or any extra JSON keys.
-- Preserve every input finding exactly once, even when evidence is incomplete.
-- Return exactly the fields shown above and no others.
+Keep the lesson grounded in the supplied evidence. Return exactly the fields
+shown above and no others. Mark illustrative scenarios as hypothetical and do
+not present them as facts. Do not provide remediation advice, code, or invent
+framework behavior, authentication, or deployment details.
 
 CodeQL findings:
 {{codeql_result}}

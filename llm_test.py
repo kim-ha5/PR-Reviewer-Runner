@@ -167,13 +167,28 @@ REVIEW_SCHEMA = {
 }
 
 
-def query_qwen(prompt):
+def review_schema_for_count(finding_count):
+    """Return the response schema constrained to the current finding count."""
+    schema = {
+        "type": REVIEW_SCHEMA["type"],
+        "items": REVIEW_SCHEMA["items"],
+        "minItems": finding_count,
+        "maxItems": finding_count,
+    }
+    return schema
+
+
+def query_qwen(prompt, finding_count=None):
     """Send a prompt to Qwen through the Ollama API."""
     payload = {
         "model": MODEL,
         "prompt": prompt,
         "stream": False,
-        "format": REVIEW_SCHEMA,
+        "format": (
+            review_schema_for_count(finding_count)
+            if finding_count is not None
+            else REVIEW_SCHEMA
+        ),
         "options": {"temperature": 0},
     }
 
@@ -337,7 +352,7 @@ def main():
     prompt = load_prompt(args.prompt, args.findings, args.source)
     findings = json.loads(args.findings.read_text(encoding="utf-8-sig"))
 
-    result = query_qwen(prompt)
+    result = query_qwen(prompt, len(findings))
 
     args.markdown_output.parent.mkdir(parents=True, exist_ok=True)
     args.markdown_output.write_text(result.rstrip() + "\n", encoding="utf-8")

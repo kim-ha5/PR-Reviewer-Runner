@@ -19,6 +19,10 @@ Return one object for every finding, preserving the finding's zero-based
   }
 ]
 
+The supplied findings are the complete input. Return exactly the same number
+of objects as findings, with each `finding_index` matching its zero-based
+position in that input.
+
 Keep the lesson grounded in the supplied evidence. Return exactly the fields
 shown above and no others. Mark illustrative scenarios as hypothetical and do
 not present them as facts. Do not provide remediation advice, code, or invent

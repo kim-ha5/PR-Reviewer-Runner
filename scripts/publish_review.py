@@ -53,7 +53,7 @@ def review_body(finding, review, marker):
         ("Exploitability", review.get("exploitability")),
         ("Confirmed facts", review.get("confirmed_facts")),
         ("Conditional risk", review.get("conditional_risk")),
-        ("Security boundary", review.get("security_boundary")),
+        ("Why this is risky", review.get("security_boundary")),
         ("Why it matters", review.get("explanation")),
         ("Impact", impact),
         ("Priority rationale", review.get("priority_rationale")),

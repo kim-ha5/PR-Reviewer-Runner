@@ -14,7 +14,7 @@ Return one object for every finding, preserving the finding's zero-based
     "finding_index": 0,
     "finding_summary": "Restate the analyzer signal and affected operation in 1-2 sentences.",
     "data_flow": "Trace the value from input to sink in 2-4 sentences.",
-    "security_boundary": "Explain the crossed trust boundary and why it matters in 1-2 sentences.",
+    "security_boundary": "Explain what trusted part of the application receives unsafe or untrusted data, and why that matters, in 1-2 beginner-friendly sentences.",
     "explanation": "Explain the finding and why the operation is unsafe in one focused paragraph.",
     "impact": "State the likely attacker outcome and required condition in 1-2 sentences."
   }

@@ -40,12 +40,40 @@ def find_pull_request(repository, commit_sha, token):
     return pull_requests[0]["number"]
 
 
-def review_body(finding, explanation, impact, marker):
+def review_body(finding, review, marker):
+    impact = review["impact"]
+    sections = [
+        ("Finding", review.get("finding_summary")),
+        ("Security concept", review.get("security_concept")),
+        ("Data flow", review.get("data_flow")),
+        ("Code evidence", review.get("code_evidence")),
+        ("Walkthrough", review.get("walkthrough")),
+        ("Attack scenario", review.get("attack_scenario")),
+        ("Reachability", review.get("reachability")),
+        ("Exploitability", review.get("exploitability")),
+        ("Confirmed facts", review.get("confirmed_facts")),
+        ("Conditional risk", review.get("conditional_risk")),
+        ("Why this is risky", review.get("security_boundary")),
+        ("Why it matters", review.get("explanation")),
+        ("Impact", impact),
+        ("Priority rationale", review.get("priority_rationale")),
+        ("Uncertainty", review.get("uncertainty")),
+        ("Missing context", review.get("missing_context")),
+        ("Learning notes", review.get("learning_notes")),
+        ("Investigation questions", review.get("investigation_questions")),
+        ("Developer takeaway", review.get("developer_takeaway")),
+        ("Confidence", review.get("confidence")),
+        ("Limitations", review.get("limitations")),
+    ]
+    rendered_sections = "\n\n".join(
+        f"**{title}:**\n{content}"
+        for title, content in sections
+        if content
+    )
     return (
         f"{marker}\n\n"
         f"### {finding.get('title', 'CodeQL finding')}\n\n"
-        f"{explanation}\n\n"
-        f"**Impact:** {impact}\n\n"
+        f"{rendered_sections}\n\n"
         f"**CodeQL rule:** `{finding['rule_id']}`"
     )
 
@@ -71,8 +99,7 @@ def publish_review(findings, explanations, repository, commit_sha, token):
         explanation = explanations[index]
         body = review_body(
             finding,
-            explanation["explanation"],
-            explanation["impact"],
+            explanation,
             marker,
         )
         locations = finding.get("locations") or []

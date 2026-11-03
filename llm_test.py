@@ -142,19 +142,53 @@ REVIEW_SCHEMA = {
             "finding_index": {"type": "integer"},
             "explanation": {"type": "string"},
             "impact": {"type": "string"},
+            "finding_summary": {"type": "string"},
+            "data_flow": {"type": "string"},
+            "code_evidence": {"type": "string"},
+            "uncertainty": {"type": "string"},
+            "developer_takeaway": {"type": "string"},
+            "security_concept": {"type": "string"},
+            "walkthrough": {"type": "string"},
+            "attack_scenario": {"type": "string"},
+            "learning_notes": {"type": "string"},
+            "reachability": {"type": "string"},
+            "exploitability": {"type": "string"},
+            "priority_rationale": {"type": "string"},
+            "missing_context": {"type": "string"},
+            "confirmed_facts": {"type": "string"},
+            "conditional_risk": {"type": "string"},
+            "confidence": {"type": "string"},
+            "limitations": {"type": "string"},
+            "security_boundary": {"type": "string"},
+            "investigation_questions": {"type": "string"},
         },
         "required": ["finding_index", "explanation", "impact"],
     },
 }
 
 
-def query_qwen(prompt):
+def review_schema_for_count(finding_count):
+    """Return the response schema constrained to the current finding count."""
+    schema = {
+        "type": REVIEW_SCHEMA["type"],
+        "items": REVIEW_SCHEMA["items"],
+        "minItems": finding_count,
+        "maxItems": finding_count,
+    }
+    return schema
+
+
+def query_qwen(prompt, finding_count=None):
     """Send a prompt to Qwen through the Ollama API."""
     payload = {
         "model": MODEL,
         "prompt": prompt,
         "stream": False,
-        "format": REVIEW_SCHEMA,
+        "format": (
+            review_schema_for_count(finding_count)
+            if finding_count is not None
+            else REVIEW_SCHEMA
+        ),
         "options": {"temperature": 0},
     }
 
@@ -214,6 +248,14 @@ def parse_review(result, finding_count):
             raise ValueError("Every review must have a non-empty explanation.")
         if not isinstance(item.get("impact"), str) or not item["impact"].strip():
             raise ValueError("Every review must have a non-empty impact.")
+        for field, value in item.items():
+            if field not in REVIEW_SCHEMA["items"]["properties"]:
+                raise ValueError(f"Unexpected review field: {field}.")
+            if field not in {"finding_index", "explanation", "impact"}:
+                if not isinstance(value, str) or not value.strip():
+                    raise ValueError(
+                        f"Optional review field {field} must be a non-empty string."
+                    )
         indices.append(item["finding_index"])
 
     if sorted(indices) != list(range(finding_count)):
@@ -310,7 +352,7 @@ def main():
     prompt = load_prompt(args.prompt, args.findings, args.source)
     findings = json.loads(args.findings.read_text(encoding="utf-8-sig"))
 
-    result = query_qwen(prompt)
+    result = query_qwen(prompt, len(findings))
 
     args.markdown_output.parent.mkdir(parents=True, exist_ok=True)
     args.markdown_output.write_text(result.rstrip() + "\n", encoding="utf-8")

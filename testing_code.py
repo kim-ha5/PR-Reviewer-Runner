@@ -1,14 +1,11 @@
-# Sample vulnerable code for testing CodeQL-to-LLM review comments.
+from flask import Flask, request
 
-# from flask import Flask, request
-# import subprocess
-#
-#
-# app = Flask(__name__)
-#
-#
-# @app.route("/run")
-# def run_command():
-#     command = request.args.get("cmd")
-#     subprocess.run(command, shell=True)
-#     return "Command executed"
+app = Flask(__name__)
+
+@app.route("/download")
+def download_file():
+    filename = request.args.get("file")
+    file_path = "/var/www/uploads/" + filename
+
+    with open(file_path, "r") as file:
+        return file.read()
